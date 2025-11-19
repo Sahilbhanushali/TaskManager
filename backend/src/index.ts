@@ -37,8 +37,10 @@ app.use(
     keys: [config.SESSION_SECRET],
     maxAge: sessionMaxAge,
     secure: config.NODE_ENV === "production",
+    secureProxy: config.NODE_ENV === "production",
     httpOnly: true,
     sameSite: config.NODE_ENV === "production" ? "none" : "lax",
+    partitioned: config.NODE_ENV === "production",
     // Set path to root so cookie is sent for all API requests
     path: "/",
   })
