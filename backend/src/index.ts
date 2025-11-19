@@ -37,6 +37,8 @@ app.use(
     secure: config.NODE_ENV === "production",
     httpOnly: true,
     sameSite: config.NODE_ENV === "production" ? "none" : "lax",
+    // Set path to root so cookie is sent for all API requests
+    path: "/",
   })
 );
 

@@ -8,14 +8,40 @@ import passport from "passport";
 
 export const googleLoginCallback = asyncHandler(
   async (req: Request, res: Response) => {
-    const currentWorkspace = req.user?.currentWorkspace;
-
-    if (!currentWorkspace) {
+    // Ensure user is logged in (passport.authenticate should have done this)
+    if (!req.user) {
+      console.error("Google OAuth callback: No user in session");
       return res.redirect(
         `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=failure`
       );
     }
 
+    console.log("Google OAuth callback: User authenticated", {
+      userId: req.user._id,
+      email: req.user.email,
+    });
+
+    const currentWorkspace = req.user?.currentWorkspace;
+
+    if (!currentWorkspace) {
+      console.error("Google OAuth callback: No workspace found for user");
+      return res.redirect(
+        `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=failure`
+      );
+    }
+
+    // Ensure session exists and is marked for saving
+    // cookie-session automatically saves at the end of the request
+    if (!req.session) {
+      req.session = {};
+    }
+    
+    console.log("Google OAuth callback: Redirecting to workspace", {
+      workspaceId: currentWorkspace,
+      frontendOrigin: config.FRONTEND_ORIGIN,
+    });
+    
+    // Redirect - cookie-session will save the session automatically
     return res.redirect(
       `${config.FRONTEND_ORIGIN}/workspace/${currentWorkspace}`
     );
