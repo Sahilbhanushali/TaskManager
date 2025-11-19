@@ -81,9 +81,9 @@ export const loginController = asyncHandler(
           });
         }
 
-        req.logIn(user, (err) => {
-          if (err) {
-            return next(err);
+        req.logIn(user, (loginError: Error | null) => {
+          if (loginError) {
+            return next(loginError);
           }
 
           return res.status(HTTPSTATUS.OK).json({
@@ -98,7 +98,7 @@ export const loginController = asyncHandler(
 
 export const logOutController = asyncHandler(
   async (req: Request, res: Response) => {
-    req.logout((err) => {
+    req.logout((err: Error | null) => {
       if (err) {
         console.error("Logout error:", err);
         return res

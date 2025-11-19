@@ -1,7 +1,11 @@
 import passport from "passport";
-import { Request } from "express";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Strategy as LocalStrategy } from "passport-local";
+import type { Express, Request } from "express";
+import {
+  Strategy as GoogleStrategy,
+  Profile,
+  VerifyCallback,
+} from "passport-google-oauth20";
+import { Strategy as LocalStrategy, IVerifyOptions } from "passport-local";
 
 import { config } from "./app.config";
 import { NotFoundException } from "../utils/appError";
@@ -16,6 +20,14 @@ const hasGoogleOAuthConfig =
   !!config.GOOGLE_CLIENT_SECRET &&
   !!config.GOOGLE_CALLBACK_URL;
 
+type LocalStrategyDoneFn = (
+  err: Error | null,
+  user?: Express.User | false,
+  options?: IVerifyOptions
+) => void;
+
+type SerializeFn = (err: Error | null, user?: Express.User | false | null) => void;
+
 if (hasGoogleOAuthConfig) {
   passport.use(
     new GoogleStrategy(
@@ -26,7 +38,13 @@ if (hasGoogleOAuthConfig) {
         scope: ["profile", "email"],
         passReqToCallback: true,
       },
-      async (req: Request, accessToken, refreshToken, profile, done) => {
+      async (
+        req: Request,
+        accessToken: string,
+        refreshToken: string,
+        profile: Profile,
+        done: VerifyCallback
+      ) => {
         try {
           const { email, sub: googleId, picture } = profile._json;
           console.log(profile, "profile");
@@ -62,7 +80,7 @@ passport.use(
       passwordField: "password",
       session: true,
     },
-    async (email, password, done) => {
+    async (email: string, password: string, done: LocalStrategyDoneFn) => {
       try {
         const user = await verifyUserService({ email, password });
         return done(null, user);
@@ -73,5 +91,5 @@ passport.use(
   )
 );
 
-passport.serializeUser((user: any, done) => done(null, user));
-passport.deserializeUser((user: any, done) => done(null, user));
+passport.serializeUser((user: Express.User, done: SerializeFn) => done(null, user));
+passport.deserializeUser((user: Express.User, done: SerializeFn) => done(null, user));

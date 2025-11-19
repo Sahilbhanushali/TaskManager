@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
-import cors from "cors";
+import cors, { CorsOptions } from "cors";
 import session from "cookie-session";
 import { config } from "./config/app.config";
 import connectDatabase from "./config/database.config";
@@ -51,26 +51,29 @@ const allowedOrigins = config.FRONTEND_ORIGIN.split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin) {
-        return callback(null, true);
-      }
+const corsOptions: CorsOptions = {
+  origin(
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean | string) => void
+  ) {
+    if (!origin) {
+      return callback(null, true);
+    }
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, origin);
-      }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, origin);
+    }
 
-      return callback(
-        new Error(`Origin ${origin} is not allowed by CORS policy`),  
-        false
-      );
-    },
-    credentials: true,
-    optionsSuccessStatus: 200,
-  })
-);
+    return callback(
+      new Error(`Origin ${origin} is not allowed by CORS policy`),
+      false
+    );
+  },
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
