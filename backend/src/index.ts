@@ -22,6 +22,8 @@ import taskRoutes from "./routes/task.route";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
+const sessionMaxAge =
+  Number(config.SESSION_EXPIRES_IN) || 24 * 60 * 60 * 1000;
 
 app.set("trust proxy", 1);
 
@@ -33,7 +35,7 @@ app.use(
   session({
     name: "session",
     keys: [config.SESSION_SECRET],
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: sessionMaxAge,
     secure: config.NODE_ENV === "production",
     httpOnly: true,
     sameSite: config.NODE_ENV === "production" ? "none" : "lax",

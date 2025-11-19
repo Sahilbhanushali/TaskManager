@@ -257,7 +257,7 @@ export const deleteTaskMutationFn = async ({
   message: string;
 }> => {
   const response = await API.delete(
-    `task/${taskId}/workspace/${workspaceId}/delete`
+    `/task/${taskId}/workspace/${workspaceId}/delete`
   );
   return response.data;
 };
